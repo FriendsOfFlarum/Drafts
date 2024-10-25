@@ -1,6 +1,4 @@
 import app from 'flarum/forum/app';
-import DiscussionComposer from 'flarum/forum/components/DiscussionComposer';
-import ReplyComposer from 'flarum/forum/components/ReplyComposer';
 import ScheduleDraftModal from '../components/ScheduleDraftModal';
 
 export default class DraftsListState {
@@ -39,26 +37,28 @@ export default class DraftsListState {
   showComposer(draft) {
     if (this.loading) return;
 
+    let componentLoader;
+
+    switch (draft.type()) {
+      case 'privateDiscussion':
+        componentLoader = () => import('flarum/forum/components/DiscussionComposer').then(async () => {
+          return await import('ext:fof/byobu/forum/pages/discussions/PrivateDiscussionComposer');
+        });
+        break;
+      case 'reply':
+        componentLoader = () => import('flarum/forum/components/ReplyComposer');
+        break;
+      default:
+        componentLoader = () => import('flarum/forum/components/DiscussionComposer');
+    }
+
     return new Promise((resolve) => {
-      let componentClass;
-
-      switch (draft.type()) {
-        case 'privateDiscussion':
-          componentClass = require('@fof-byobu').discussions['PrivateDiscussionComposer'];
-          break;
-        case 'reply':
-          componentClass = ReplyComposer;
-          break;
-        default:
-          componentClass = DiscussionComposer;
-      }
-
       const data = draft.compileData();
-      app.composer.load(componentClass, data);
 
-      app.composer.show();
-
-      Object.assign(app.composer.fields, data.fields);
+      app.composer.load(componentLoader, data).then(() => {
+        app.composer.show();
+        Object.assign(app.composer.fields, data.fields);
+      });
 
       return resolve(app.composer);
     });
