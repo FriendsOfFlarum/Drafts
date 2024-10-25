@@ -58,7 +58,7 @@
         }
     },
     "require-dev": {
-        "blomstra/gdpr": "@beta",
+        "flarum/gdpr": "*",
         "flarum/phpstan": "*"
     },
     "scripts": {
