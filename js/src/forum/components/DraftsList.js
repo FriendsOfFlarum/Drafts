@@ -44,8 +44,8 @@ export default class DraftsList extends Component {
     const state = this.attrs.state;
 
     return (
-      <div className="NotificationList DraftsList">
-        <div className="NotificationList-header">
+      <div className="HeaderList DraftsList">
+        <div className="HeaderList-header">
           <h4 className="App-titleControl App-titleControl--text">{app.translator.trans('fof-drafts.forum.dropdown.title')}</h4>
           <div class="App-primaryControl">
             <Tooltip showOnFocus={false} text={app.translator.trans('fof-drafts.forum.dropdown.delete_all_button')}>
@@ -58,8 +58,8 @@ export default class DraftsList extends Component {
             </Tooltip>
           </div>
         </div>
-        <div className="NotificationList-content">
-          <ul className="NotificationGroup-content">
+        <div className="HeaderList-content">
+          <ul className="HeaderListGroup-content">
             {drafts.length
               ? drafts
                   .sort((a, b) => b.updatedAt() - a.updatedAt())
@@ -71,7 +71,7 @@ export default class DraftsList extends Component {
             {state.loading ? (
               <LoadingIndicator display="block" />
             ) : (
-              !drafts.length && <div className="NotificationList-empty">{app.translator.trans('fof-drafts.forum.dropdown.empty_text')}</div>
+              !drafts.length && <div className="HeaderList-empty">{app.translator.trans('fof-drafts.forum.dropdown.empty_text')}</div>
             )}
           </ul>
         </div>

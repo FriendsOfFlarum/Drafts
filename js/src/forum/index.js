@@ -67,28 +67,28 @@ app.initializers.add('fof-drafts', () => {
       }
     }
 
-    if (!data.relationships && !draft.relationships()) {
+    if (!data.attributes?.relationships && !draft.relationships()) {
       return false;
     }
 
-    const relationships = Object.keys(data.relationships);
+    const relationships = Object.keys(data.attributes?.relationships || {});
 
     const equalRelationships = (data, draft, relationship) => {
       if (
-        (!data.relationships[relationship] || !data.relationships[relationship].length) &&
+        (!data.attributes?.relationships[relationship] || !data.attributes?.relationships[relationship].length) &&
         (!(relationship in draft.relationships()) || !draft.relationships()[relationship].data?.length)
       ) {
         return true;
       } else if (
         !(relationship in draft.relationships()) ||
-        data.relationships[relationship].length !== draft.relationships()[relationship].data?.length
+        data.attributes?.relationships[relationship].length !== draft.relationships()[relationship].data?.length
       ) {
         return false;
       }
 
       const getId = (element) => (typeof element.id == 'function' ? element.id() : element.id);
 
-      const dataIds = fillRelationship(data.relationships[relationship], getId);
+      const dataIds = fillRelationship(data.attributes?.relationships[relationship], getId);
       const draftIds = fillRelationship(draft.relationships()[relationship].data, getId);
 
       return !dataIds.some((id, i) => id !== draftIds[i]);
@@ -96,7 +96,7 @@ app.initializers.add('fof-drafts', () => {
 
     for (const relationship of relationships) {
       if (!draft) {
-        if (data.relationships[relationship]) {
+        if (data.attributes?.relationships[relationship]) {
           return true;
         }
       } else {
@@ -130,25 +130,46 @@ app.initializers.add('fof-drafts', () => {
       return;
     }
 
-    if (draft) {
-      delete draft.data.attributes.relationships;
+    const data = this.data();
 
-      draft.save(Object.assign(draft.data.attributes, this.data())).then(() => afterSave());
+    // We need to save the raw value of the relationships as a normal attribute.
+    for (const key in data.relationships) {
+      const model = data.relationships[key];
+
+      if (model === null) continue;
+
+      data.relationships[key] = {
+        data: model instanceof Array ? model.map(Model.getIdentifier) : Model.getIdentifier(model),
+      };
+    }
+
+    if (draft) {
+      delete draft.data.attributes?.relationships;
+
+      draft
+        .save(Object.assign(draft.data.attributes, data))
+        .then(() => afterSave())
+        .finally(() => {
+          this.saving = false;
+        });
     } else {
       app.store
         .createRecord('drafts')
-        .save(this.data())
+        .save(data)
         .then((draft) => {
           draft.loadRelationships(true);
           this.draft = draft;
           afterSave();
+        })
+        .finally(() => {
+          this.saving = false;
         });
     }
   };
 
   extend('flarum/forum/components/Composer', 'controlItems', function (items) {
     if (
-      !(this.state.bodyMatches(DiscussionComposer) || this.state.bodyMatches(ReplyComposer)) ||
+      !(this.state.bodyMatches('flarum/forum/components/DiscussionComposer') || this.state.bodyMatches('flarum/forum/components/ReplyComposer')) ||
       !app.forum.attribute('canSaveDrafts') ||
       this.state.position === 'minimized'
     )
@@ -247,9 +268,8 @@ app.initializers.add('fof-drafts', () => {
   extend('flarum/forum/components/DiscussionComposer', 'onsubmit', deleteDraftsOnSubmit);
   extend('flarum/forum/components/ReplyComposer', 'onsubmit', deleteDraftsOnSubmit);
 
-  if (app.initializers.has('fof-byobu')) {
-    const PrivateDiscussionComposer = flarum.extensions['fof-byobu'].discussions.PrivateDiscussionComposer;
-    extend(PrivateDiscussionComposer.prototype, 'onsubmit', deleteDraftsOnSubmit);
+  if ('fof-byobu' in flarum.extensions) {
+    extend('ext:fof/byobu/forum/pages/discussions/PrivateDiscussionComposer', 'onsubmit', deleteDraftsOnSubmit);
   }
 
   addDraftsDropdown();

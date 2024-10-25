@@ -48,14 +48,14 @@ class PublishDrafts extends AbstractCommand
     /**
      * {@inheritdoc}
      */
-    protected function fire()
+    protected function fire(): int
     {
         $this->info('Starting...');
 
         if (!$this->settings->get('fof-drafts.enable_scheduled_drafts')) {
             $this->error($this->translator->trans('fof-drafts.console.scheduled_drafts_disabled'));
 
-            return;
+            return AbstractCommand::FAILURE;
         }
 
         foreach (Draft::where('scheduled_for', '<=', Carbon::now())->with('user')->get() as $draft) {
@@ -101,5 +101,7 @@ class PublishDrafts extends AbstractCommand
         }
 
         $this->info('Done.');
+
+        return AbstractCommand::SUCCESS;
     }
 }

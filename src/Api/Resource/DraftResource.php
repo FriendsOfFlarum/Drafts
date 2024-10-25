@@ -10,6 +10,7 @@ use Flarum\Api\Schema;
 use Flarum\Api\Sort\SortColumn;
 use FoF\Drafts\Draft;
 use Illuminate\Database\Eloquent\Builder;
+use Laminas\Diactoros\Response\EmptyResponse;
 use Tobyz\JsonApiServer\Context as OriginalContext;
 
 /**
@@ -54,7 +55,8 @@ class DraftResource extends Resource\AbstractDatabaseResource
                 ->authenticated()
                 ->action(function (Context $context) {
                     $context->getActor()->drafts()->delete();
-                }),
+                })
+                ->response(fn () => new EmptyResponse(204)),
             Endpoint\Index::make()
                 ->authenticated()
                 ->can('user.saveDrafts')
@@ -67,7 +69,7 @@ class DraftResource extends Resource\AbstractDatabaseResource
         return [
 
             Schema\Str::make('title')
-                ->requiredOnCreate()
+                ->nullable()
                 ->minLength(1)
                 ->maxLength(255)
                 ->writable(),
