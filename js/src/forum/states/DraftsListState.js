@@ -41,9 +41,10 @@ export default class DraftsListState {
 
     switch (draft.type()) {
       case 'privateDiscussion':
-        componentLoader = () => import('flarum/forum/components/DiscussionComposer').then(async () => {
-          return await import('ext:fof/byobu/forum/pages/discussions/PrivateDiscussionComposer');
-        });
+        componentLoader = () =>
+          import('flarum/forum/components/DiscussionComposer').then(async () => {
+            return await import('ext:fof/byobu/forum/pages/discussions/PrivateDiscussionComposer');
+          });
         break;
       case 'reply':
         componentLoader = () => import('flarum/forum/components/ReplyComposer');
