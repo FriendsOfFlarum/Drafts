@@ -34,6 +34,8 @@ class Draft extends AbstractModel
     protected $casts = [
         'updated_at'    => 'datetime',
         'scheduled_for' => 'datetime',
+        'extra'         => 'array',
+        'relationships' => 'array',
     ];
 
     /**
