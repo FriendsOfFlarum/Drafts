@@ -33,7 +33,6 @@ export default class Draft extends mixin(Model, {
       return 'reply';
     } else if (
       flarum.extensions['fof-byobu'] &&
-      flarum.extensions['fof-byobu'].discussions && // If private discussion composer is not exported, we can't support PM drafts.
       ('recipientGroups' in relationships || 'recipientUsers' in relationships)
     ) {
       return 'privateDiscussion';
