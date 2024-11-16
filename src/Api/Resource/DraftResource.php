@@ -46,7 +46,8 @@ class DraftResource extends Resource\AbstractDatabaseResource
                 ->can('user.saveDrafts'),
             Endpoint\Update::make()
                 ->authenticated()
-                ->can('user.saveDrafts'),
+                ->can('user.saveDrafts')
+                ->visible(fn (Draft $draft, Context $context) => $context->getActor()->id === $draft->user_id),
             Endpoint\Delete::make()
                 ->authenticated()
                 ->visible(fn (Draft $draft, Context $context) => $context->getActor()->id === $draft->user_id),
