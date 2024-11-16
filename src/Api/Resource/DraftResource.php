@@ -70,7 +70,7 @@ class DraftResource extends Resource\AbstractDatabaseResource
 
             Schema\Str::make('title')
                 ->nullable()
-                ->minLength(1)
+                ->minLength(0)
                 ->maxLength(255)
                 ->writable(),
             Schema\Str::make('content')
