@@ -43,6 +43,7 @@ class DraftResource extends Resource\AbstractDatabaseResource
         return [
             Endpoint\Create::make()
                 ->authenticated()
+                ->defaultInclude(['user'])
                 ->can('user.saveDrafts'),
             Endpoint\Update::make()
                 ->authenticated()
@@ -52,7 +53,7 @@ class DraftResource extends Resource\AbstractDatabaseResource
                 ->authenticated()
                 ->visible(fn (Draft $draft, Context $context) => $context->getActor()->id === $draft->user_id),
             Endpoint\Endpoint::make('delete.all')
-                ->route('DELETE', '/drafts/all')
+                ->route('DELETE', '/all')
                 ->authenticated()
                 ->action(function (Context $context) {
                     $context->getActor()->drafts()->delete();
