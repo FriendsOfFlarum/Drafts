@@ -49,9 +49,6 @@ class DraftResource extends Resource\AbstractDatabaseResource
                 ->authenticated()
                 ->can('user.saveDrafts')
                 ->visible(fn (Draft $draft, Context $context) => $context->getActor()->id === $draft->user_id),
-            Endpoint\Delete::make()
-                ->authenticated()
-                ->visible(fn (Draft $draft, Context $context) => $context->getActor()->id === $draft->user_id),
             Endpoint\Endpoint::make('delete.all')
                 ->route('DELETE', '/all')
                 ->authenticated()
@@ -59,6 +56,9 @@ class DraftResource extends Resource\AbstractDatabaseResource
                     $context->getActor()->drafts()->delete();
                 })
                 ->response(fn () => new EmptyResponse(204)),
+            Endpoint\Delete::make()
+                ->authenticated()
+                ->visible(fn (Draft $draft, Context $context) => $context->getActor()->id === $draft->user_id),
             Endpoint\Index::make()
                 ->authenticated()
                 ->can('user.saveDrafts')
